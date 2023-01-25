@@ -42,17 +42,22 @@ const parseParagraphBlock = (block: ParagraphBlockObjectResponse) => {
   console.log(paragraph)
   if (!paragraph.length) return
 
-  const text = paragraph[0].plain_text
-
   return (
-    <Paragraph
-      italic={paragraph[0].annotations.italic}
-      bold={paragraph[0].annotations.bold}
-      underline={paragraph[0].annotations.underline}
-      strikethrough={paragraph[0].annotations.strikethrough}
-    >
-      {textWithLinebraks(text)}
-    </Paragraph>
+    <p className="mb-2">
+      {paragraph.map((paragraphPart, index) => {
+        return (
+          <Paragraph
+            key={paragraphPart.plain_text + index}
+            italic={paragraphPart.annotations.italic}
+            bold={paragraphPart.annotations.bold}
+            underline={paragraphPart.annotations.underline}
+            strikethrough={paragraphPart.annotations.strikethrough}
+          >
+            {textWithLinebraks(paragraphPart.plain_text)}
+          </Paragraph>
+        )
+      })}
+    </p>
   )
 }
 

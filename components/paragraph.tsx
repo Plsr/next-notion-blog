@@ -17,9 +17,8 @@ export const Paragraph = ({
   strikethrough,
 }: ParagraphProps) => {
   return (
-    <p
+    <span
       className={clsx(
-        'mb-2',
         italic && 'italic',
         bold && 'font-bold',
         underline && 'underline',
@@ -27,6 +26,6 @@ export const Paragraph = ({
       )}
     >
       {children}
-    </p>
+    </span>
   )
 }
