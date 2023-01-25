@@ -7,6 +7,7 @@ type TextAtomProps = {
   bold?: boolean
   underline?: boolean
   strikethrough?: boolean
+  code?: boolean
   href?: string
 }
 
@@ -16,6 +17,7 @@ export const TextAtom = ({
   bold,
   underline,
   strikethrough,
+  code,
   href,
 }: TextAtomProps) => {
   const classNames = clsx(
@@ -23,15 +25,20 @@ export const TextAtom = ({
     bold && 'font-bold',
     underline && 'underline',
     strikethrough && 'line-through',
-    !!href && 'text-blue-500 underline'
+    code && 'font-monospace bg-slate-100 px-2 py-1 rounded text-slate-600'
   )
 
-  if (!!href) {
-    return (
-      <a href={href} className={classNames}>
-        {children}
-      </a>
-    )
+  const wrappedChildren = !!href ? (
+    <a href={href} className="text-blue-500 underline">
+      {children}
+    </a>
+  ) : (
+    <>{children}</>
+  )
+
+  if (code) {
+    return <code className={classNames}>{wrappedChildren}</code>
   }
-  return <span className={classNames}>{children}</span>
+
+  return <span className={classNames}>{wrappedChildren}</span>
 }

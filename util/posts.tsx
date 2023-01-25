@@ -39,10 +39,8 @@ const parseBlock = (block: BlockObjectResponse) => {
 const parseParagraphBlock = (block: ParagraphBlockObjectResponse) => {
   // console.log('Parsing paragraph')
   const paragraph = block.paragraph.rich_text
-  // console.log(paragraph)
+  console.log(paragraph)
   if (!paragraph.length) return
-
-  paragraph[0].href && console.log(paragraph[0].href)
 
   return (
     <p className="mb-2">
@@ -54,6 +52,7 @@ const parseParagraphBlock = (block: ParagraphBlockObjectResponse) => {
             bold={paragraphPart.annotations.bold}
             underline={paragraphPart.annotations.underline}
             strikethrough={paragraphPart.annotations.strikethrough}
+            code={paragraphPart.annotations.code}
             href={paragraphPart.href || undefined}
           >
             {textWithLinebraks(paragraphPart.plain_text)}
