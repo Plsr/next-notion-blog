@@ -1,4 +1,4 @@
-import { Paragraph } from '@/components/paragraph'
+import { TextAtom } from '@/components/textAtom'
 import { Client } from '@notionhq/client'
 import {
   PageObjectResponse,
@@ -37,24 +37,27 @@ const parseBlock = (block: BlockObjectResponse) => {
 }
 
 const parseParagraphBlock = (block: ParagraphBlockObjectResponse) => {
-  console.log('Parsing paragraph')
+  // console.log('Parsing paragraph')
   const paragraph = block.paragraph.rich_text
-  console.log(paragraph)
+  // console.log(paragraph)
   if (!paragraph.length) return
+
+  paragraph[0].href && console.log(paragraph[0].href)
 
   return (
     <p className="mb-2">
       {paragraph.map((paragraphPart, index) => {
         return (
-          <Paragraph
+          <TextAtom
             key={paragraphPart.plain_text + index}
             italic={paragraphPart.annotations.italic}
             bold={paragraphPart.annotations.bold}
             underline={paragraphPart.annotations.underline}
             strikethrough={paragraphPart.annotations.strikethrough}
+            href={paragraphPart.href || undefined}
           >
             {textWithLinebraks(paragraphPart.plain_text)}
-          </Paragraph>
+          </TextAtom>
         )
       })}
     </p>
