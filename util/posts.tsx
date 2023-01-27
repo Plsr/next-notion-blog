@@ -15,6 +15,7 @@ import {
   BulletedListItemBlockObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints'
 import { parseHeading } from './parsers/headings'
+import { parseList } from './parsers/lists'
 import { parseParagraphBlock } from './parsers/paragraphs'
 import { createTextAtoms } from './parsers/util'
 
@@ -56,11 +57,11 @@ type CustomBlockObjectResponse =
   | UnorderedListBlockObjectResponse
   | OrderedListBlockObjectResponse
 
-type UnorderedListBlockObjectResponse = {
+export type UnorderedListBlockObjectResponse = {
   type: 'unordered_list'
   children: BulletedListItemBlockObjectResponse[]
 }
-type OrderedListBlockObjectResponse = {
+export type OrderedListBlockObjectResponse = {
   type: 'ordered_list'
   children: NumberedListItemBlockObjectResponse[]
 }
@@ -68,6 +69,8 @@ type OrderedListBlockObjectResponse = {
 // From: [p, p, h, p, bli, bli, bli, p, bli, bli, bli]
 // To: [p, p, h, p, ul, p, ul]
 // TODO: Refactor
+// TODO: Finde a better place for this
+// TODO: Document
 const transformBlocksList = (blockList: BlockObjectResponse[]) => {
   const listIndizes: {
     type: string
@@ -134,24 +137,8 @@ const parseBlock = (block: CustomBlockObjectResponse) => {
     return parseHeading(block)
   }
 
-  if (block.type === 'unordered_list') {
-    return (
-      <ul>
-        {block.children.map((child) => (
-          <li>{child.bulleted_list_item.rich_text[0].plain_text}</li>
-        ))}
-      </ul>
-    )
-  }
-
-  if (block.type === 'ordered_list') {
-    return (
-      <ol>
-        {block.children.map((child) => (
-          <li>{child.numbered_list_item.rich_text[0].plain_text}</li>
-        ))}
-      </ol>
-    )
+  if (block.type === 'unordered_list' || block.type === 'ordered_list') {
+    return parseList(block)
   }
 }
 
