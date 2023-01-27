@@ -11,28 +11,111 @@ import {
   Heading2BlockObjectResponse,
   Heading3BlockObjectResponse,
   RichTextItemResponse,
+  NumberedListItemBlockObjectResponse,
+  BulletedListItemBlockObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints'
+import { parseHeading } from './parsers/headings'
+import { parseParagraphBlock } from './parsers/paragraphs'
+import { createTextAtoms } from './parsers/util'
 
 const notion = new Client({
   auth: process.env.NOTION_AUTH,
 })
 const databaseId = process.env.DB_ID
 
-const SUPPORTED_BLOCKS = ['paragraph', 'heading_1', 'heading_2', 'heading_3']
+const HEADING_BLOCKS = [
+  'heading_1',
+  'heading_2',
+  'heading_3',
+  'unordered_list',
+  'ordered_list',
+]
+const SUPPORTED_BLOCKS = ['paragraph', ...HEADING_BLOCKS]
 
 export const foo = async () => {
   const res = await notion.databases.query({ database_id: databaseId! })
   const posts = publishedPosts(res.results)
 
   const blocks = await notion.blocks.children.list({ block_id: posts[0].id })
+  const results = blocks.results
+  // console.log(blocks.results)
+  const transformedBlocks = transformBlocksList(
+    results as BlockObjectResponse[]
+  )
   return (
     <>
-      {blocks.results.map((block) => parseBlock(block as BlockObjectResponse))}
+      {transformedBlocks.map((block) =>
+        parseBlock(block as CustomBlockObjectResponse)
+      )}
     </>
   )
 }
 
-const parseBlock = (block: BlockObjectResponse) => {
+type CustomBlockObjectResponse =
+  | BlockObjectResponse
+  | UnorderedListBlockObjectResponse
+  | OrderedListBlockObjectResponse
+
+type UnorderedListBlockObjectResponse = {
+  type: 'unordered_list'
+  children: BulletedListItemBlockObjectResponse[]
+}
+type OrderedListBlockObjectResponse = {
+  type: 'ordered_list'
+  children: NumberedListItemBlockObjectResponse[]
+}
+
+// From: [p, p, h, p, bli, bli, bli, p, bli, bli, bli]
+// To: [p, p, h, p, ul, p, ul]
+// TODO: Refactor
+const transformBlocksList = (blockList: BlockObjectResponse[]) => {
+  const listIndizes: {
+    type: string
+    indizes: number[]
+    blocks: BlockObjectResponse[]
+  }[] = [] // Groups of indizes, may need objects here bc need type
+  const skipIndizes: number[] = [] // flat array, just so we don't do dup stuff
+
+  blockList.forEach((block, index) => {
+    if (
+      (block.type === 'bulleted_list_item' ||
+        block.type === 'numbered_list_item') &&
+      !skipIndizes.includes(index)
+    ) {
+      console.log('Will need to combine some blocks here')
+      const startingIndex = index
+      const currentType = block.type
+      const slicedBlocksList = blockList.slice(startingIndex)
+      const indizes = [startingIndex]
+
+      for (let i = 1; i < slicedBlocksList.length; i++) {
+        if (slicedBlocksList[i].type !== currentType) break
+        indizes.push(startingIndex + i)
+      }
+
+      listIndizes.push({
+        type: currentType,
+        indizes,
+        blocks: indizes.map((i) => blockList[i]),
+      })
+      skipIndizes.push(...indizes)
+    }
+  })
+
+  const blockListCopy = [...blockList] as CustomBlockObjectResponse[]
+  listIndizes.forEach((index) => {
+    blockListCopy.splice(index.indizes[0], index.indizes.length, {
+      type:
+        index.type === 'bulleted_list_item' ? 'unordered_list' : 'ordered_list',
+      children: index.blocks,
+    } as UnorderedListBlockObjectResponse | OrderedListBlockObjectResponse)
+  })
+
+  // console.log(blockListCopy)
+  return blockListCopy
+}
+
+const parseBlock = (block: CustomBlockObjectResponse) => {
   if (!SUPPORTED_BLOCKS.includes(block.type)) {
     console.warn(`Encountered unsupported block type: ${block.type}`)
     return null
@@ -50,80 +133,26 @@ const parseBlock = (block: BlockObjectResponse) => {
   ) {
     return parseHeading(block)
   }
-}
 
-const parseHeading = (
-  block:
-    | Heading1BlockObjectResponse
-    | Heading2BlockObjectResponse
-    | Heading3BlockObjectResponse
-) => {
-  console.log(block)
-  let text
-  switch (block.type) {
-    case 'heading_1':
-      text = block.heading_1.rich_text
-      break
-    case 'heading_2':
-      text = block.heading_2.rich_text
-      break
-    case 'heading_3':
-      text = block.heading_3.rich_text
-      break
+  if (block.type === 'unordered_list') {
+    return (
+      <ul>
+        {block.children.map((child) => (
+          <li>{child.bulleted_list_item.rich_text[0].plain_text}</li>
+        ))}
+      </ul>
+    )
   }
 
-  console.log(text)
-
-  if (!text.length) return null
-
-  const level = headlineLevels[block.type]
-
-  return <Headline level={level}>{createTextAtoms(text)}</Headline>
-}
-
-const headlineLevels = {
-  heading_1: 1,
-  heading_2: 2,
-  heading_3: 3,
-}
-
-const parseParagraphBlock = (block: ParagraphBlockObjectResponse) => {
-  const paragraph = block.paragraph.rich_text
-  if (!paragraph.length) return null
-
-  return <Paragraph>{createTextAtoms(paragraph)}</Paragraph>
-}
-
-const createTextAtoms = (textParts: RichTextItemResponse[]) => {
-  return textParts.map((textParts, index) => {
+  if (block.type === 'ordered_list') {
     return (
-      <TextAtom
-        key={textParts.plain_text + index}
-        italic={textParts.annotations.italic}
-        bold={textParts.annotations.bold}
-        underline={textParts.annotations.underline}
-        strikethrough={textParts.annotations.strikethrough}
-        code={textParts.annotations.code}
-        href={textParts.href || undefined}
-      >
-        {textWithLinebraks(textParts.plain_text)}
-      </TextAtom>
+      <ol>
+        {block.children.map((child) => (
+          <li>{child.numbered_list_item.rich_text[0].plain_text}</li>
+        ))}
+      </ol>
     )
-  })
-}
-
-const textWithLinebraks = (text: string) => {
-  const textArray = text.split('\n')
-  return textArray.map((text, index) =>
-    index === 0 ? (
-      <>{text}</>
-    ) : (
-      <>
-        <br />
-        {text}
-      </>
-    )
-  )
+  }
 }
 
 const publishedPosts = (
