@@ -6,8 +6,10 @@ import {
   BlockObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints'
 import { parseHeading } from './parsers/headings'
+import { parseImages } from './parsers/images'
 import { parseList } from './parsers/lists'
 import { parseParagraphBlock } from './parsers/paragraphs'
+import { parseQuote } from './parsers/quote'
 import { CustomBlockObjectResponse, transformBlocksList } from './transformers'
 
 const notion = new Client({
@@ -15,14 +17,15 @@ const notion = new Client({
 })
 const databaseId = process.env.DB_ID
 
-const HEADING_BLOCKS = [
-  'heading_1',
-  'heading_2',
-  'heading_3',
+const HEADING_BLOCKS = ['heading_1', 'heading_2', 'heading_3']
+const SUPPORTED_BLOCKS = [
+  'paragraph',
+  ...HEADING_BLOCKS,
   'unordered_list',
   'ordered_list',
+  'quote',
+  'image',
 ]
-const SUPPORTED_BLOCKS = ['paragraph', ...HEADING_BLOCKS]
 
 export const foo = async () => {
   const res = await notion.databases.query({ database_id: databaseId! })
@@ -64,6 +67,14 @@ const parseBlock = (block: CustomBlockObjectResponse) => {
 
   if (block.type === 'unordered_list' || block.type === 'ordered_list') {
     return parseList(block)
+  }
+
+  if (block.type === 'quote') {
+    return parseQuote(block)
+  }
+
+  if (block.type === 'image') {
+    return parseImages(block)
   }
 }
 
