@@ -106,15 +106,22 @@ const transformBlocksList = (blockList: BlockObjectResponse[]) => {
   })
 
   const blockListCopy = [...blockList] as CustomBlockObjectResponse[]
+  let deletedIndizesCount = 0 // If we remove from the array, we need to adapt the following indizes
   listIndizes.forEach((index) => {
-    blockListCopy.splice(index.indizes[0], index.indizes.length, {
-      type:
-        index.type === 'bulleted_list_item' ? 'unordered_list' : 'ordered_list',
-      children: index.blocks,
-    } as UnorderedListBlockObjectResponse | OrderedListBlockObjectResponse)
+    blockListCopy.splice(
+      index.indizes[0] - deletedIndizesCount,
+      index.indizes.length,
+      {
+        type:
+          index.type === 'bulleted_list_item'
+            ? 'unordered_list'
+            : 'ordered_list',
+        children: index.blocks,
+      } as UnorderedListBlockObjectResponse | OrderedListBlockObjectResponse
+    )
+    deletedIndizesCount += index.indizes.length - 1
   })
 
-  // console.log(blockListCopy)
   return blockListCopy
 }
 
