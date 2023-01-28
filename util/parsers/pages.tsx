@@ -64,7 +64,6 @@ const parseBlock = (block: CustomBlockObjectResponse) => {
   }
 
   if (block.type === 'code') {
-    console.log(block.code.rich_text)
     return (
       <Code
         code={block.code.rich_text[0].plain_text}
