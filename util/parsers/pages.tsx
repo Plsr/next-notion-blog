@@ -9,6 +9,7 @@ import { parseImages } from './images'
 import { parseList } from './lists'
 import { parseParagraphBlock } from './paragraphs'
 import { parseQuote } from './quote'
+import { parseTodos } from './todos'
 
 const HEADING_BLOCKS = ['heading_1', 'heading_2', 'heading_3']
 const SUPPORTED_BLOCKS = [
@@ -19,6 +20,7 @@ const SUPPORTED_BLOCKS = [
   'quote',
   'image',
   'code',
+  'to_do',
 ]
 
 export const parsePage = (page: BlockObjectResponse[]) => {
@@ -70,5 +72,9 @@ const parseBlock = (block: CustomBlockObjectResponse) => {
         language={block.code.language}
       />
     )
+  }
+
+  if (block.type === 'to_do') {
+    return parseTodos(block)
   }
 }
