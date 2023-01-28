@@ -5,6 +5,7 @@ import {
   PartialPageObjectResponse,
   BlockObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints'
+import { isConstructorDeclaration } from 'typescript'
 import { parsePage } from './parsers/pages'
 
 const notion = new Client({
@@ -27,10 +28,21 @@ export const listPages = async () => {
       return {
         title: getPageTitle(post),
         id: post.id,
-        createdAt: post.created_time,
+        publishedAt: getPagePublishedAt(post),
       }
     })
-  return postsList
+  return postsList.sort(
+    (a, b) =>
+      new Date(b.publishedAt).valueOf() - new Date(a.publishedAt).valueOf()
+  )
+}
+
+const getPagePublishedAt = (page: PageObjectResponse) => {
+  const publishedAtObject = page.properties.published_time
+
+  if (publishedAtObject.type !== 'date' || !publishedAtObject.date)
+    return new Date('01.02.1970')
+  return publishedAtObject.date.start
 }
 
 const getPageTitle = (page: PageObjectResponse) => {

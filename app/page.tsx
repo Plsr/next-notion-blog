@@ -11,7 +11,7 @@ export default async function Home() {
         <Link key={page.id} href={`posts/${page.id}`}>
           <div className="mb-4">
             <h3 className="text-lg font-bold">{page.title}</h3>
-            <span className="text-sm text-slate-500">{page.createdAt}</span>
+            <span className="text-sm text-slate-500">{page.publishedAt}</span>
           </div>
         </Link>
       ))}
