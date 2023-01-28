@@ -1,3 +1,4 @@
+import { Code } from '@/components/code'
 import { Client } from '@notionhq/client'
 import {
   PageObjectResponse,
@@ -25,6 +26,7 @@ const SUPPORTED_BLOCKS = [
   'ordered_list',
   'quote',
   'image',
+  'code',
 ]
 
 export const foo = async () => {
@@ -75,6 +77,16 @@ const parseBlock = (block: CustomBlockObjectResponse) => {
 
   if (block.type === 'image') {
     return parseImages(block)
+  }
+
+  if (block.type === 'code') {
+    console.log(block.code.rich_text)
+    return (
+      <Code
+        code={block.code.rich_text[0].plain_text}
+        language={block.code.language}
+      />
+    )
   }
 }
 
