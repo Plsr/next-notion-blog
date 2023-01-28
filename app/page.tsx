@@ -1,6 +1,20 @@
-import { foo } from '@/util/posts'
+import { listPages } from '@/util/posts'
+import Link from 'next/link'
 
 export default async function Home() {
-  const notionFoo = await foo()
-  return <main>{notionFoo}</main>
+  const pagesList = await listPages()
+
+  return (
+    <main className="w-[600px] mx-auto mt-12">
+      <h2 className="text-xl font-bold mb-6">All posts</h2>
+      {pagesList.map((page) => (
+        <Link key={page.id} href={`posts/${page.id}`}>
+          <div className="mb-4">
+            <h3 className="text-lg font-bold">{page.title}</h3>
+            <span className="text-sm text-slate-500">{page.createdAt}</span>
+          </div>
+        </Link>
+      ))}
+    </main>
+  )
 }
