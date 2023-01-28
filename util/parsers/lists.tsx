@@ -2,7 +2,7 @@ import { List } from '@/components/list'
 import {
   OrderedListBlockObjectResponse,
   UnorderedListBlockObjectResponse,
-} from '../posts'
+} from '../transformers'
 import { createTextAtoms } from './util'
 
 export const parseList = (
