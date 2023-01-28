@@ -7,7 +7,7 @@ type ToDoProps = {
 
 export const ToDo = ({ checked, children }: ToDoProps) => {
   return (
-    <div className="flex items-center">
+    <div className="flex items-center mb-2">
       <CheckBox checked={checked} />
       {children}
     </div>

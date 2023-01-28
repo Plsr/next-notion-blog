@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import './globals.css'
 
 export const revalidate = 60
@@ -14,7 +15,17 @@ export default function RootLayout({
         head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
       */}
       <head />
-      <body>{children}</body>
+      <body className="p-4">
+        <header className="mb-6">
+          <Link
+            href="/"
+            className="hover:underline hover:text-blue-500 font-bold"
+          >
+            Home
+          </Link>
+        </header>
+        <main className="max-w-[600px] mx-auto px-4">{children}</main>
+      </body>
     </html>
   )
 }
