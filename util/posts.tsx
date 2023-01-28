@@ -41,7 +41,7 @@ const getPagePublishedAt = (page: PageObjectResponse) => {
   const publishedAtObject = page.properties.published_time
 
   if (publishedAtObject.type !== 'date' || !publishedAtObject.date)
-    return new Date('01.02.1970')
+    return new Date('01.02.1970').toDateString()
   return publishedAtObject.date.start
 }
 
