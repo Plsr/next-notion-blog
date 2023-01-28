@@ -18,7 +18,7 @@ const CheckBox = ({ checked }: { checked: boolean }) => {
   return (
     <div
       className={clsx(
-        'mr-2 w-4 h-4 border-2 border-slate-700',
+        'mr-2 w-4 h-4 border-2 border-slate-700 flex-shrink-0',
         checked && 'bg-blue-500 border-blue-500 flex items-center'
       )}
     >
