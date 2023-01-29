@@ -25,7 +25,8 @@ export const TextAtom = ({
     bold && 'font-bold',
     underline && 'underline',
     strikethrough && 'line-through',
-    code && 'font-monospace bg-slate-100 px-2 py-1 rounded text-slate-600'
+    code &&
+      'font-monospace bg-slate-100 px-2 py-1 rounded text-slate-600 text-xs'
   )
 
   const wrappedChildren = !!href ? (

@@ -10,12 +10,14 @@ type CodeProps = {
 
 export const Code = ({ code, language }: CodeProps) => {
   return (
-    <SyntaxHighlighter
-      customStyle={{ fontSize: '0.8rem' }}
-      language={language}
-      style={docco}
-    >
-      {code}
-    </SyntaxHighlighter>
+    <div className="mb-4">
+      <SyntaxHighlighter
+        customStyle={{ fontSize: '0.8rem' }}
+        language={language}
+        style={docco}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
   )
 }

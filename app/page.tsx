@@ -5,7 +5,7 @@ export default async function Home() {
   const pagesList = await listPages()
 
   return (
-    <main>
+    <div>
       <h2 className="text-xl font-bold mb-6">All posts</h2>
       {pagesList.map((page) => (
         <Link key={page.id} href={`posts/${page.id}`}>
@@ -15,6 +15,6 @@ export default async function Home() {
           </div>
         </Link>
       ))}
-    </main>
+    </div>
   )
 }
