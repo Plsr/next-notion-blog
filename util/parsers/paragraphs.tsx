@@ -8,3 +8,14 @@ export const parseParagraphBlock = (block: ParagraphBlockObjectResponse) => {
 
   return <Paragraph>{createTextAtoms(paragraph)}</Paragraph>
 }
+
+export const validateHref = (href: string | undefined | null) => {
+  if (!href) return undefined
+
+  try {
+    const url = new URL(href)
+    return url.toString()
+  } catch (_e) {
+    return undefined
+  }
+}

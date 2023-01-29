@@ -1,8 +1,11 @@
 import { TextAtom } from '@/components/textAtom'
 import { RichTextItemResponse } from '@notionhq/client/build/src/api-endpoints'
+import { validateHref } from './paragraphs'
 
 export const createTextAtoms = (textParts: RichTextItemResponse[]) => {
   return textParts.map((textParts, index) => {
+    const validatedHref = validateHref(textParts.href)
+
     return (
       <TextAtom
         key={textParts.plain_text + index}
@@ -11,7 +14,7 @@ export const createTextAtoms = (textParts: RichTextItemResponse[]) => {
         underline={textParts.annotations.underline}
         strikethrough={textParts.annotations.strikethrough}
         code={textParts.annotations.code}
-        href={textParts.href || undefined}
+        href={validatedHref}
       >
         {textWithLinebraks(textParts.plain_text)}
       </TextAtom>
