@@ -1,4 +1,4 @@
-import { getPage } from '@/util/posts'
+import { getPageData } from '@/util/posts'
 import { notFound } from 'next/navigation'
 import { validate } from 'uuid'
 
@@ -13,6 +13,14 @@ export default async function PostPage({ params }: PostPageProps) {
 
   if (!pageId || !validate(pageId)) notFound()
 
-  const pageContent = await getPage(pageId)
-  return <main>{pageContent}</main>
+  const pageData = await getPageData(pageId)
+  return (
+    <main>
+      <h2 className="text-xl font-bold">{pageData.metadata.title}</h2>
+      <small className="block text-xs text-slate-500 mb-6">
+        {pageData.metadata.publishedAt}
+      </small>
+      <div>{pageData.content}</div>
+    </main>
+  )
 }

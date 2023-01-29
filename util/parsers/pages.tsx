@@ -23,7 +23,7 @@ const SUPPORTED_BLOCKS = [
   'to_do',
 ]
 
-export const parsePage = (page: BlockObjectResponse[]) => {
+export const parsePageContents = (page: BlockObjectResponse[]) => {
   const transformedBlocks = transformBlocksList(page)
   return (
     <>

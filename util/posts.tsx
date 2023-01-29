@@ -5,18 +5,31 @@ import {
   PartialPageObjectResponse,
   BlockObjectResponse,
 } from '@notionhq/client/build/src/api-endpoints'
-import { isConstructorDeclaration } from 'typescript'
-import { parsePage } from './parsers/pages'
+import { parsePageContents } from './parsers/pages'
 
 const notion = new Client({
   auth: process.env.NOTION_AUTH,
 })
 const databaseId = process.env.DB_ID
 
-export const getPage = async (id: string) => {
+export const getPageData = async (id: string) => {
   const blocks = await notion.blocks.children.list({ block_id: id })
-  const results = blocks.results
-  return parsePage(results as BlockObjectResponse[])
+  const page = await notion.pages.retrieve({ page_id: id })
+
+  const pageContent = parsePageContents(blocks.results as BlockObjectResponse[])
+  const pageMetaData = getPageMetaData(page as PageObjectResponse)
+
+  return {
+    content: pageContent,
+    metadata: { ...pageMetaData },
+  }
+}
+
+const getPageMetaData = (page: PageObjectResponse) => {
+  return {
+    title: getPageTitle(page),
+    publishedAt: getPagePublishedAt(page),
+  }
 }
 
 export const listPages = async () => {
