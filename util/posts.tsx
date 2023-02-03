@@ -1,9 +1,8 @@
-import { Code } from '@/components/code'
 import { Client } from '@notionhq/client'
 import {
   PageObjectResponse,
-  PartialPageObjectResponse,
   BlockObjectResponse,
+  QueryDatabaseParameters,
 } from '@notionhq/client/build/src/api-endpoints'
 import { parsePageContents } from './parsers/pages'
 
@@ -32,9 +31,32 @@ const getPageMetaData = (page: PageObjectResponse) => {
   }
 }
 
-export const listPages = async () => {
-  const res = await notion.databases.query({ database_id: databaseId! })
-  const posts = publishedPosts(res.results) as PageObjectResponse[]
+type Filter = QueryDatabaseParameters['filter']
+
+export const getPageByFilter = async ({ filter }: { filter: Filter }) => {
+  const res = await notion.databases.query({
+    database_id: databaseId!,
+    filter,
+  })
+
+  if (res.results.length > 1) {
+    return undefined
+  }
+
+  return await getPageData(res.results[0].id)
+}
+
+export const listPages = async ({
+  filter = undefined,
+}: {
+  filter?: Filter
+}) => {
+  const res = await notion.databases.query({
+    database_id: databaseId!,
+    filter,
+  })
+  const posts = res.results as PageObjectResponse[]
+
   const postsList = posts
     .filter((posts) => posts.object === 'page')
     .map((post) => {
@@ -42,6 +64,7 @@ export const listPages = async () => {
         title: getPageTitle(post),
         id: post.id,
         publishedAt: getPagePublishedAt(post),
+        url: getPageUrl(post),
       }
     })
   return postsList.sort(
@@ -58,6 +81,14 @@ const getPagePublishedAt = (page: PageObjectResponse) => {
   return publishedAtObject.date.start
 }
 
+const getPageUrl = (page: PageObjectResponse) => {
+  const urlObject = page.properties.url
+
+  if (urlObject.type !== 'rich_text' || !urlObject.rich_text.length)
+    return undefined
+  return urlObject.rich_text[0].plain_text
+}
+
 const getPageTitle = (page: PageObjectResponse) => {
   const titleObject = Object.values(page.properties).find(
     (propertyObject) => propertyObject.type === 'title'
@@ -67,16 +98,4 @@ const getPageTitle = (page: PageObjectResponse) => {
   if (!titleObject || titleObject.type !== 'title') return undefined
 
   return titleObject.title[0].plain_text
-}
-
-const publishedPosts = (
-  pages: PageObjectResponse[] | PartialPageObjectResponse[]
-) => {
-  return pages.filter((page) => {
-    const tags = (page as PageObjectResponse).properties['Tags']
-    return (
-      tags.type === 'multi_select' &&
-      tags.multi_select.find((entry) => entry.name === 'published')
-    )
-  })
 }
