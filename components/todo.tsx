@@ -1,7 +1,8 @@
+import React from 'react'
 import clsx from 'clsx'
 
 type ToDoProps = {
-  children: JSX.Element[]
+  children: React.JSX.Element[]
   checked: boolean
 }
 
