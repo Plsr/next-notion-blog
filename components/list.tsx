@@ -1,7 +1,8 @@
+import React from 'react'
 import clsx from 'clsx'
 
 type ListProps = {
-  children: JSX.Element[][]
+  children: React.JSX.Element[][]
   type: 'ordered' | 'unordered'
 }
 

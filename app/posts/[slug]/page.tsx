@@ -1,4 +1,4 @@
-import { getPageByFilter, getPageData, listPages } from '@/util/posts'
+import { getPageByFilter, listPages } from '@/util/posts'
 import { notFound } from 'next/navigation'
 
 export const revalidate = 60
@@ -19,19 +19,21 @@ export async function generateStaticParams() {
 }
 
 type PostPageProps = {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  if (!params || !params.slug) notFound()
+  const { slug } = await params
+
+  if (!slug) notFound()
 
   const pageData = await getPageByFilter({
     filter: {
       property: 'url',
       rich_text: {
-        equals: params.slug,
+        equals: slug,
       },
     },
   })

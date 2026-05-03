@@ -1,5 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import './globals.css'
+
+export const metadata: Metadata = {
+  title: 'Next Notion Blog',
+  description: 'A blog powered by Notion',
+  icons: { icon: '/favicon.ico' },
+}
 
 export default function RootLayout({
   children,
@@ -8,11 +15,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/*
-        <head /> will contain the components returned by the nearest parent
-        head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
-      */}
-      <head />
       <body className="p-4">
         <header className="mb-6">
           <Link

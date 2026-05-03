@@ -1,6 +1,8 @@
+import React from 'react'
+
 type ImageProps = {
   src: string
-  caption?: JSX.Element[]
+  caption?: React.JSX.Element[]
 }
 
 export const Figure = ({ src, caption }: ImageProps) => {
